@@ -1,0 +1,114 @@
+﻿@page "/flowers/edit"
+@using Microsoft.EntityFrameworkCore
+@using lab02.Models
+@inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Flower</h2>
+<hr />
+@if (Flower is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Flower" OnValidSubmit="UpdateFlower" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="Flower.FlowerId" value="@Flower.FlowerId" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Flower.Name" class="form-control" />
+                    <ValidationMessage For="() => Flower.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="kind" class="form-label">Kind:</label>
+                    <InputText id="kind" @bind-Value="Flower.Kind" class="form-control" />
+                    <ValidationMessage For="() => Flower.Kind" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="averageheight" class="form-label">AverageHeight:</label>
+                    <InputNumber id="averageheight" @bind-Value="Flower.AverageHeight" class="form-control" />
+                    <ValidationMessage For="() => Flower.AverageHeight" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="leaftype" class="form-label">LeafType:</label>
+                    <InputText id="leaftype" @bind-Value="Flower.LeafType" class="form-control" />
+                    <ValidationMessage For="() => Flower.LeafType" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="canbloom" class="form-label">CanBloom:</label>
+                    <InputCheckbox id="canbloom" @bind-Value="Flower.CanBloom" class="form-check-input" />
+                    <ValidationMessage For="() => Flower.CanBloom" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="details" class="form-label">Details:</label>
+                    <InputText id="details" @bind-Value="Flower.Details" class="form-control" />
+                    <ValidationMessage For="() => Flower.Details" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/flowers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int FlowerId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Flower? Flower { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Flower ??= await context.Flowers.FirstOrDefaultAsync(m => m.FlowerId == FlowerId);
+
+        if (Flower is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateFlower()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Flower!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!FlowerExists(Flower!.FlowerId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/flowers");
+    }
+
+    private bool FlowerExists(int flowerid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Flowers.Any(e => e.FlowerId == flowerid);
+    }
+}

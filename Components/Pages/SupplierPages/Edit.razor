@@ -1,0 +1,109 @@
+﻿@page "/suppliers/edit"
+@using Microsoft.EntityFrameworkCore
+@using lab02.Models
+@inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Supplier</h2>
+<hr />
+@if (Supplier is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Supplier" OnValidSubmit="UpdateSupplier" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="Supplier.SupplierId" value="@Supplier.SupplierId" />
+                <div class="mb-3">
+                    <label for="fullname" class="form-label">FullName:</label>
+                    <InputText id="fullname" @bind-Value="Supplier.FullName" class="form-control" />
+                    <ValidationMessage For="() => Supplier.FullName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="shortname" class="form-label">ShortName:</label>
+                    <InputText id="shortname" @bind-Value="Supplier.ShortName" class="form-control" />
+                    <ValidationMessage For="() => Supplier.ShortName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="legaladdress" class="form-label">LegalAddress:</label>
+                    <InputText id="legaladdress" @bind-Value="Supplier.LegalAddress" class="form-control" />
+                    <ValidationMessage For="() => Supplier.LegalAddress" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="phonenumber" class="form-label">PhoneNumber:</label>
+                    <InputText id="phonenumber" @bind-Value="Supplier.PhoneNumber" class="form-control" />
+                    <ValidationMessage For="() => Supplier.PhoneNumber" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="directorname" class="form-label">DirectorName:</label>
+                    <InputText id="directorname" @bind-Value="Supplier.DirectorName" class="form-control" />
+                    <ValidationMessage For="() => Supplier.DirectorName" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/suppliers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int SupplierId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Supplier? Supplier { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Supplier ??= await context.Suppliers.FirstOrDefaultAsync(m => m.SupplierId == SupplierId);
+
+        if (Supplier is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSupplier()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Supplier!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SupplierExists(Supplier!.SupplierId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/suppliers");
+    }
+
+    private bool SupplierExists(int supplierid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Suppliers.Any(e => e.SupplierId == supplierid);
+    }
+}

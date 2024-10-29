@@ -1,0 +1,64 @@
+﻿@page "/suppliers/create"
+@using Microsoft.EntityFrameworkCore
+@using lab02.Models
+@inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Supplier</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Supplier" OnValidSubmit="AddSupplier" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="fullname" class="form-label">FullName:</label> 
+                <InputText id="fullname" @bind-Value="Supplier.FullName" class="form-control" /> 
+                <ValidationMessage For="() => Supplier.FullName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="shortname" class="form-label">ShortName:</label> 
+                <InputText id="shortname" @bind-Value="Supplier.ShortName" class="form-control" /> 
+                <ValidationMessage For="() => Supplier.ShortName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="legaladdress" class="form-label">LegalAddress:</label> 
+                <InputText id="legaladdress" @bind-Value="Supplier.LegalAddress" class="form-control" /> 
+                <ValidationMessage For="() => Supplier.LegalAddress" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phonenumber" class="form-label">PhoneNumber:</label> 
+                <InputText id="phonenumber" @bind-Value="Supplier.PhoneNumber" class="form-control" /> 
+                <ValidationMessage For="() => Supplier.PhoneNumber" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="directorname" class="form-label">DirectorName:</label> 
+                <InputText id="directorname" @bind-Value="Supplier.DirectorName" class="form-control" /> 
+                <ValidationMessage For="() => Supplier.DirectorName" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/suppliers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Supplier Supplier { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSupplier()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Suppliers.Add(Supplier);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/suppliers");
+    }
+}

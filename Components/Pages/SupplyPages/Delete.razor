@@ -1,0 +1,71 @@
+﻿@page "/supplies/delete"
+@using Microsoft.EntityFrameworkCore
+@using lab02.Models
+@inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Supply</h2>
+    <hr />
+    @if (supply is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">FlowerId</dt>
+            <dd class="col-sm-10">@supply.FlowerId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DeliveryDate</dt>
+            <dd class="col-sm-10">@supply.DeliveryDate</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">PricePerUnit</dt>
+            <dd class="col-sm-10">@supply.PricePerUnit</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Units</dt>
+            <dd class="col-sm-10">@supply.Units</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">SupplierId</dt>
+            <dd class="col-sm-10">@supply.SupplierId</dd>
+        </dl>
+        <EditForm method="post" Model="supply" OnValidSubmit="DeleteSupply" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(supply is null)">Delete</button> |
+            <a href="/supplies">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Supply? supply;
+
+    [SupplyParameterFromQuery]
+    private int SupplyId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        supply = await context.Supplies.FirstOrDefaultAsync(m => m.SupplyId == SupplyId);
+
+        if (supply is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteSupply()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Supplies.Remove(supply!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/supplies");
+    }
+}

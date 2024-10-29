@@ -1,0 +1,54 @@
+﻿@page "/supplies/details"
+@using Microsoft.EntityFrameworkCore
+@using lab02.Models
+@inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Supply</h2>
+    <hr />
+    @if (supply is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">FlowerId</dt>
+            <dd class="col-sm-10">@supply.FlowerId</dd>
+            <dt class="col-sm-2">DeliveryDate</dt>
+            <dd class="col-sm-10">@supply.DeliveryDate</dd>
+            <dt class="col-sm-2">PricePerUnit</dt>
+            <dd class="col-sm-10">@supply.PricePerUnit</dd>
+            <dt class="col-sm-2">Units</dt>
+            <dd class="col-sm-10">@supply.Units</dd>
+            <dt class="col-sm-2">SupplierId</dt>
+            <dd class="col-sm-10">@supply.SupplierId</dd>
+        </dl>
+        <div>
+            <a href="@($"/supplies/edit?supplyid={supply.SupplyId}")">Edit</a> |
+            <a href="@($"/supplies")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Supply? supply;
+
+    [SupplyParameterFromQuery]
+    private int SupplyId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        supply = await context.Supplies.FirstOrDefaultAsync(m => m.SupplyId == SupplyId);
+
+        if (supply is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

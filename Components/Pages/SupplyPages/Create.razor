@@ -14,12 +14,18 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
-                <label for="flowerid" class="form-label">Идентификатор цветка:</label> 
-                <InputNumber id="flowerid" @bind-Value="Supply.FlowerId" class="form-control" /> 
-                <ValidationMessage For="() => Supply.FlowerId" class="text-danger" /> 
-            </div>        
+                <label for="flowerid" class="form-label">Идентификатор цветка:</label>
+                <InputSelect id="flowerid" @bind-Value="Supply.FlowerId" class="form-select">
+                    <option value="">Выберите цветок</option>
+                    @foreach (var flower in flowers!)
+                    {
+                        <option value="@flower.FlowerId">@flower.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Supply.FlowerId" class="text-danger" />
+            </div>     
             <div class="mb-3">
-                <label for="deliverydate" class="form-label">Дата доставки:</label> 
+                <label for="deliverydate" class="form-label">Дата поставки:</label> 
                 <InputDate id="deliverydate" @bind-Value="Supply.DeliveryDate" class="form-control" /> 
                 <ValidationMessage For="() => Supply.DeliveryDate" class="text-danger" /> 
             </div>        
@@ -32,12 +38,18 @@
                 <label for="units" class="form-label">Количество:</label> 
                 <InputNumber id="units" @bind-Value="Supply.Units" class="form-control" /> 
                 <ValidationMessage For="() => Supply.Units" class="text-danger" /> 
-            </div>        
+            </div>
             <div class="mb-3">
-                <label for="supplierid" class="form-label">Идентификатор поставщика:</label> 
-                <InputNumber id="supplierid" @bind-Value="Supply.SupplierId" class="form-control" /> 
-                <ValidationMessage For="() => Supply.SupplierId" class="text-danger" /> 
-            </div>        
+                <label for="supplierid" class="form-label">Поставщик:</label>
+                <InputSelect id="supplierid" @bind-Value="Supply.SupplierId" class="form-select">
+                    <option value="">Выберите поставщика</option>
+                     @foreach (var supplier in suppliers!)
+                     {
+                         <option value="@supplier.SupplierId">@supplier.FullName</option>
+                     }
+                </InputSelect>
+                <ValidationMessage For="() => Supply.SupplierId" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </EditForm>
     </div>
@@ -51,6 +63,18 @@
     [SupplyParameterFromForm]
     private Supply Supply { get; set; } = new();
 
+    private List<Flower>? flowers;
+    private List<Supplier>? suppliers;
+
+    protected override Task OnInitializedAsync()
+    {
+        Supply.DeliveryDate = DateTime.Now;
+
+        using var context = DbFactory.CreateDbContext();
+        flowers = context.Flowers.ToList();
+        suppliers = context.Suppliers.ToList();
+        return Task.CompletedTask;
+    }
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddSupply()
     {

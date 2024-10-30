@@ -6,26 +6,26 @@
 @implements IAsyncDisposable
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Список цветов</PageTitle>
 
-<h1>Index</h1>
+<h1>Список цветов</h1>
 
 <p>
-    <a href="flowers/create">Create New</a>
+    <a href="flowers/create">Создать</a>
 </p>
 
 <QuickGrid Class="table" Items="context.Flowers">
-    <PropertyColumn Property="flower => flower.Name" />
-    <PropertyColumn Property="flower => flower.Kind" />
-    <PropertyColumn Property="flower => flower.AverageHeight" />
-    <PropertyColumn Property="flower => flower.LeafType" />
-    <PropertyColumn Property="flower => flower.CanBloom" />
-    <PropertyColumn Property="flower => flower.Details" />
+    <PropertyColumn Title="Имя" Property="flower => flower.Name" />
+    <PropertyColumn Title="Сорт" Property="flower => flower.Kind" />
+    <PropertyColumn Title="Ср. высота" Property="flower => flower.AverageHeight" />
+    <PropertyColumn Title="Тип цветка" Property="flower => flower.LeafType" />
+    <PropertyColumn Title="Цветет?" Property="@(flower => flower.CanBloom ? "Да" : "Нет")" />
+    <PropertyColumn Title="Доп. сведения" Property="flower => flower.Details" />
 
     <TemplateColumn Context="flower">
-        <a href="@($"flowers/edit?flowerid={flower.FlowerId}")">Edit</a> |
-        <a href="@($"flowers/details?flowerid={flower.FlowerId}")">Details</a> |
-        <a href="@($"flowers/delete?flowerid={flower.FlowerId}")">Delete</a>
+        <a href="@($"flowers/edit?flowerid={flower.FlowerId}")">Редактировать</a> |
+        <a href="@($"flowers/details?flowerid={flower.FlowerId}")">Детали</a> |
+        <a href="@($"flowers/delete?flowerid={flower.FlowerId}")">Удалить</a>
     </TemplateColumn>
 </QuickGrid>
 

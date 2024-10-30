@@ -4,42 +4,41 @@
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Delete</PageTitle>
+<PageTitle>Удаление поставщика</PageTitle>
 
-<h1>Delete</h1>
+<h1>Удаление поставщика</h1>
 
-<p>Are you sure you want to delete this?</p>
+<p>Вы уверены, что хотите удалить?</p>
 <div>
-    <h2>Supplier</h2>
     <hr />
     @if (supplier is null)
     {
-        <p><em>Loading...</em></p>
+        <p><em>Загрузка...</em></p>
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">FullName</dt>
+            <dt class="col-sm-2">Полное наименование</dt>
             <dd class="col-sm-10">@supplier.FullName</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">ShortName</dt>
+            <dt class="col-sm-2">Сокращенное наименование</dt>
             <dd class="col-sm-10">@supplier.ShortName</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">LegalAddress</dt>
+            <dt class="col-sm-2">Юридический адрес</dt>
             <dd class="col-sm-10">@supplier.LegalAddress</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">PhoneNumber</dt>
+            <dt class="col-sm-2">Номер телефона</dt>
             <dd class="col-sm-10">@supplier.PhoneNumber</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">DirectorName</dt>
+            <dt class="col-sm-2">ФИО директора</dt>
             <dd class="col-sm-10">@supplier.DirectorName</dd>
         </dl>
         <EditForm method="post" Model="supplier" OnValidSubmit="DeleteSupplier" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(supplier is null)">Delete</button> |
-            <a href="/suppliers">Back to List</a>
+            <button type="submit" class="btn btn-danger" disabled="@(supplier is null)">Удалить</button> |
+            <a href="/suppliers">Назад к списку</a>
         </EditForm>
     }
 </div>

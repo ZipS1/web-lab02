@@ -4,35 +4,34 @@
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Подробности цветка</PageTitle>
 
-<h1>Details</h1>
+<h1>Подробности цветка</h1>
 
 <div>
-    <h2>Flower</h2>
     <hr />
     @if (flower is null)
     {
-        <p><em>Loading...</em></p>
+        <p><em>Загрузка...</em></p>
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">Name</dt>
+            <dt class="col-sm-2">Имя</dt>
             <dd class="col-sm-10">@flower.Name</dd>
-            <dt class="col-sm-2">Kind</dt>
+            <dt class="col-sm-2">Сорт</dt>
             <dd class="col-sm-10">@flower.Kind</dd>
-            <dt class="col-sm-2">AverageHeight</dt>
+            <dt class="col-sm-2">Ср. высота</dt>
             <dd class="col-sm-10">@flower.AverageHeight</dd>
-            <dt class="col-sm-2">LeafType</dt>
+            <dt class="col-sm-2">Тип цветка</dt>
             <dd class="col-sm-10">@flower.LeafType</dd>
-            <dt class="col-sm-2">CanBloom</dt>
-            <dd class="col-sm-10">@flower.CanBloom</dd>
-            <dt class="col-sm-2">Details</dt>
+            <dt class="col-sm-2">Цветет?</dt>
+            <dd class="col-sm-10">@(flower.CanBloom ? "Да" : "Нет")</dd>
+            <dt class="col-sm-2">Доп. сведения</dt>
             <dd class="col-sm-10">@flower.Details</dd>
         </dl>
         <div>
-            <a href="@($"/flowers/edit?flowerid={flower.FlowerId}")">Edit</a> |
-            <a href="@($"/flowers")">Back to List</a>
+            <a href="@($"/flowers/edit?flowerid={flower.FlowerId}")">Редактировать</a> |
+            <a href="@($"/flowers")">Назад к списку</a>
         </div>
     }
 </div>

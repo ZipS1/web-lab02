@@ -6,25 +6,25 @@
 @implements IAsyncDisposable
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Список поставщиков</PageTitle>
 
-<h1>Index</h1>
+<h1>Список поставщиков</h1>
 
 <p>
-    <a href="suppliers/create">Create New</a>
+    <a href="suppliers/create">Создать</a>
 </p>
 
 <QuickGrid Class="table" Items="context.Suppliers">
-    <PropertyColumn Property="supplier => supplier.FullName" />
-    <PropertyColumn Property="supplier => supplier.ShortName" />
-    <PropertyColumn Property="supplier => supplier.LegalAddress" />
-    <PropertyColumn Property="supplier => supplier.PhoneNumber" />
-    <PropertyColumn Property="supplier => supplier.DirectorName" />
+    <PropertyColumn Title="Полное наименование" Property="supplier => supplier.FullName" />
+    <PropertyColumn Title="Сокращенное наименование" Property="supplier => supplier.ShortName" />
+    <PropertyColumn Title="Юридический адрес" Property="supplier => supplier.LegalAddress" />
+    <PropertyColumn Title="Номер телефона" Property="supplier => supplier.PhoneNumber" />
+    <PropertyColumn Title="ФИО директора" Property="supplier => supplier.DirectorName" />
 
     <TemplateColumn Context="supplier">
-        <a href="@($"suppliers/edit?supplierid={supplier.SupplierId}")">Edit</a> |
-        <a href="@($"suppliers/details?supplierid={supplier.SupplierId}")">Details</a> |
-        <a href="@($"suppliers/delete?supplierid={supplier.SupplierId}")">Delete</a>
+        <a href="@($"suppliers/edit?supplierid={supplier.SupplierId}")">Редактировать</a> |
+        <a href="@($"suppliers/details?supplierid={supplier.SupplierId}")">Детали</a> |
+        <a href="@($"suppliers/delete?supplierid={supplier.SupplierId}")">Удалить</a>
     </TemplateColumn>
 </QuickGrid>
 

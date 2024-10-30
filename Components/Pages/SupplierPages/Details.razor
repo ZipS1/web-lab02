@@ -4,12 +4,11 @@
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Детали поставщика</PageTitle>
 
-<h1>Details</h1>
+<h1>Детали поставщика</h1>
 
 <div>
-    <h2>Supplier</h2>
     <hr />
     @if (supplier is null)
     {
@@ -17,20 +16,20 @@
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">FullName</dt>
+            <dt class="col-sm-2">Полное наименование</dt>
             <dd class="col-sm-10">@supplier.FullName</dd>
-            <dt class="col-sm-2">ShortName</dt>
+            <dt class="col-sm-2">Сокращенное наименование</dt>
             <dd class="col-sm-10">@supplier.ShortName</dd>
-            <dt class="col-sm-2">LegalAddress</dt>
+            <dt class="col-sm-2">Юридический адрес</dt>
             <dd class="col-sm-10">@supplier.LegalAddress</dd>
-            <dt class="col-sm-2">PhoneNumber</dt>
+            <dt class="col-sm-2">Номер телефона</dt>
             <dd class="col-sm-10">@supplier.PhoneNumber</dd>
-            <dt class="col-sm-2">DirectorName</dt>
+            <dt class="col-sm-2">ФИО директора</dt>
             <dd class="col-sm-10">@supplier.DirectorName</dd>
         </dl>
         <div>
-            <a href="@($"/suppliers/edit?supplierid={supplier.SupplierId}")">Edit</a> |
-            <a href="@($"/suppliers")">Back to List</a>
+            <a href="@($"/suppliers/edit?supplierid={supplier.SupplierId}")">Редактировать</a> |
+            <a href="@($"/suppliers")">Назад к списку</a>
         </div>
     }
 </div>

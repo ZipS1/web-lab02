@@ -1,10 +1,13 @@
-﻿namespace lab02.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace lab02.Models
 {
     public class Flower
     {
+        [Display(Name = "Имя")]
         public int FlowerId { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public string? Kind { get; set; }
 

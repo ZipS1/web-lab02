@@ -4,11 +4,9 @@
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Создание поставки</PageTitle>
 
-<h1>Create</h1>
-
-<h2>Supply</h2>
+<h1>Создание поставки</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -16,37 +14,37 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
-                <label for="flowerid" class="form-label">FlowerId:</label> 
+                <label for="flowerid" class="form-label">Идентификатор цветка:</label> 
                 <InputNumber id="flowerid" @bind-Value="Supply.FlowerId" class="form-control" /> 
                 <ValidationMessage For="() => Supply.FlowerId" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="deliverydate" class="form-label">DeliveryDate:</label> 
+                <label for="deliverydate" class="form-label">Дата доставки:</label> 
                 <InputDate id="deliverydate" @bind-Value="Supply.DeliveryDate" class="form-control" /> 
                 <ValidationMessage For="() => Supply.DeliveryDate" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="priceperunit" class="form-label">PricePerUnit:</label> 
+                <label for="priceperunit" class="form-label">Цена за единицу:</label> 
                 <InputNumber id="priceperunit" @bind-Value="Supply.PricePerUnit" class="form-control" /> 
                 <ValidationMessage For="() => Supply.PricePerUnit" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="units" class="form-label">Units:</label> 
+                <label for="units" class="form-label">Количество:</label> 
                 <InputNumber id="units" @bind-Value="Supply.Units" class="form-control" /> 
                 <ValidationMessage For="() => Supply.Units" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="supplierid" class="form-label">SupplierId:</label> 
+                <label for="supplierid" class="form-label">Идентификатор поставщика:</label> 
                 <InputNumber id="supplierid" @bind-Value="Supply.SupplierId" class="form-control" /> 
                 <ValidationMessage For="() => Supply.SupplierId" class="text-danger" /> 
             </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
         </EditForm>
     </div>
 </div>
 
 <div>
-    <a href="/supplies">Back to List</a>
+    <a href="/supplies">Назад к списку</a>
 </div>
 
 @code {

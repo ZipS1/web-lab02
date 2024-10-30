@@ -4,11 +4,9 @@
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Создание цветка</PageTitle>
 
-<h1>Create</h1>
-
-<h2>Flower</h2>
+<h1>Создание цветка</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -16,42 +14,42 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
-                <label for="name" class="form-label">Name:</label> 
+                <label for="name" class="form-label">Имя:</label> 
                 <InputText id="name" @bind-Value="Flower.Name" class="form-control" /> 
                 <ValidationMessage For="() => Flower.Name" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="kind" class="form-label">Kind:</label> 
+                <label for="kind" class="form-label">Сорт:</label> 
                 <InputText id="kind" @bind-Value="Flower.Kind" class="form-control" /> 
                 <ValidationMessage For="() => Flower.Kind" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="averageheight" class="form-label">AverageHeight:</label> 
+                <label for="averageheight" class="form-label">Ср. высота:</label> 
                 <InputNumber id="averageheight" @bind-Value="Flower.AverageHeight" class="form-control" /> 
                 <ValidationMessage For="() => Flower.AverageHeight" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="leaftype" class="form-label">LeafType:</label> 
+                <label for="leaftype" class="form-label">Тип цветка:</label> 
                 <InputText id="leaftype" @bind-Value="Flower.LeafType" class="form-control" /> 
                 <ValidationMessage For="() => Flower.LeafType" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="canbloom" class="form-label">CanBloom:</label> 
+                <label for="canbloom" class="form-label">Цветет?</label> 
                 <InputCheckbox id="canbloom" @bind-Value="Flower.CanBloom" class="form-check-input" /> 
                 <ValidationMessage For="() => Flower.CanBloom" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="details" class="form-label">Details:</label> 
+                <label for="details" class="form-label">Доп. сведения:</label> 
                 <InputText id="details" @bind-Value="Flower.Details" class="form-control" /> 
                 <ValidationMessage For="() => Flower.Details" class="text-danger" /> 
             </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="submit" class="btn btn-primary">Создать</button>
         </EditForm>
     </div>
 </div>
 
 <div>
-    <a href="/flowers">Back to List</a>
+    <a href="/flowers">Назад к списку</a>
 </div>
 
 @code {

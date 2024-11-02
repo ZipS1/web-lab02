@@ -5,16 +5,27 @@
 @using lab02.Database
 @implements IAsyncDisposable
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Список поставок</PageTitle>
 
-<h1>Список поставок</h1>
+<h1>Список поставок @SupplierNamePlaceholder</h1>
+@if (SupplierId is not null)
+{
+    <p>
+        <a href="@($"suppliers")">К списку поставщиков</a>
+    </p>
+
+    <p>
+        <a href="@($"supplies")">К полному списку поставок</a>
+    </p>
+}
 
 <p>
-    <a href="supplies/create">Создать</a>
+    <a href="@($"supplies/create?supplierid={SupplierId}")">Создать</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Supplies">
+<QuickGrid Class="table" Items="context.Supplies.Where(s => SupplierId == null || s.SupplierId == SupplierId)">
     <PropertyColumn Title="Цветок" Property="@(supply => $"{context.Flowers.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name}")" />
     <PropertyColumn Title="Дата поставки" Property="supply => supply.DeliveryDate.ToShortDateString()" />
     <PropertyColumn Title="Цена за единицу" Property="supply => supply.PricePerUnit" />
@@ -22,18 +33,24 @@
     <PropertyColumn Title="Поставщик" Property="@(supply => $"{context.Suppliers.FirstOrDefault(f => f.SupplierId == supply.SupplierId)!.FullName}")" />
 
     <TemplateColumn Context="supply">
-        <a href="@($"supplies/edit?supplyid={supply.SupplyId}")">Редактировать</a> |
-        <a href="@($"supplies/details?supplyid={supply.SupplyId}")">Детали</a> |
-        <a href="@($"supplies/delete?supplyid={supply.SupplyId}")">Удалить</a>
+        <a href="@($"supplies/edit?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Редактировать</a> |
+        <a href="@($"supplies/details?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Детали</a> |
+        <a href="@($"supplies/delete?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Удалить</a>
     </TemplateColumn>
 </QuickGrid>
 
 @code {
+    [SupplyParameterFromQuery]
+    public int? SupplierId { get; set; }
+
+    private string SupplierNamePlaceholder = string.Empty;
+
     private AppDbContext context = default!;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

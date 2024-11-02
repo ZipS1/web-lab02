@@ -6,7 +6,7 @@
 
 <PageTitle>Создание поставки</PageTitle>
 
-<h1>Создание поставки</h1>
+<h1>Создание поставки @SupplierNamePlaceholder</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,7 +14,7 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
-                <label for="flowerid" class="form-label">Идентификатор цветка:</label>
+                <label for="flowerid" class="form-label">Цветок:</label>
                 <InputSelect id="flowerid" @bind-Value="Supply.FlowerId" class="form-select">
                     <option value="">Выберите цветок</option>
                     @foreach (var flower in flowers!)
@@ -41,13 +41,21 @@
             </div>
             <div class="mb-3">
                 <label for="supplierid" class="form-label">Поставщик:</label>
-                <InputSelect id="supplierid" @bind-Value="Supply.SupplierId" class="form-select">
+                @if (SupplierId is null)
+                {
+                    <InputSelect id="supplierid" @bind-Value="Supply.SupplierId" class="form-select">
                     <option value="">Выберите поставщика</option>
                      @foreach (var supplier in suppliers!)
                      {
                          <option value="@supplier.SupplierId">@supplier.FullName</option>
                      }
-                </InputSelect>
+                    </InputSelect>
+                } else
+                {
+                    <InputSelect id="supplierid" @bind-Value="Supply.SupplierId" class="form-select" disabled>
+                        <option value="@SupplierId">@suppliers!.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName</option>
+                    </InputSelect>
+                }
                 <ValidationMessage For="() => Supply.SupplierId" class="text-danger" />
             </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
@@ -56,12 +64,24 @@
 </div>
 
 <div>
-    <a href="/supplies">Назад к списку</a>
+    <a href="@($"/supplies?supplierid={SupplierId}")">Назад к списку поставок @SupplierNamePlaceholder</a>
 </div>
+
+@if (SupplierId is not null)
+{
+    <div>
+        <a href="@($"/supplies")">Назад к полному списку поставок</a>
+    </div>
+}
 
 @code {
     [SupplyParameterFromForm]
     private Supply Supply { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private int? SupplierId { get; set; }
+
+    private string SupplierNamePlaceholder = string.Empty;
 
     private List<Flower>? flowers;
     private List<Supplier>? suppliers;
@@ -69,10 +89,14 @@
     protected override Task OnInitializedAsync()
     {
         Supply.DeliveryDate = DateTime.Now;
+        Supply.SupplierId = SupplierId ?? Supply.SupplierId;
 
         using var context = DbFactory.CreateDbContext();
         flowers = context.Flowers.ToList();
         suppliers = context.Suppliers.ToList();
+
+        SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
+
         return Task.CompletedTask;
     }
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.

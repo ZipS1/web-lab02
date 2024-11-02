@@ -6,7 +6,7 @@
 
 <PageTitle>Удаление поставки</PageTitle>
 
-<h1>Удаление поставки</h1>
+<h1>Удаление поставки @SupplierNamePlaceholder</h1>
 
 <p>Вы уверены, что хотите удалить?</p>
 <div>
@@ -17,12 +17,12 @@
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">Идентификатор цветка</dt>
-            <dd class="col-sm-10">@supply.FlowerId</dd>
+            <dt class="col-sm-2">Цветок</dt>
+            <dd class="col-sm-10">@(flowers!.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name)</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Дата доставки</dt>
-            <dd class="col-sm-10">@supply.DeliveryDate</dd>
+            <dd class="col-sm-10">@supply.DeliveryDate.ToShortDateString()</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Цена за единицу</dt>
@@ -33,12 +33,12 @@
             <dd class="col-sm-10">@supply.Units</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">Идентификатор поставщика</dt>
-            <dd class="col-sm-10">@supply.SupplierId</dd>
+            <dt class="col-sm-2">Поставщик</dt>
+            <dd class="col-sm-10">@(suppliers!.FirstOrDefault(s => s.SupplierId == supply.SupplierId)!.FullName)</dd>
         </dl>
         <EditForm method="post" Model="supply" OnValidSubmit="DeleteSupply" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(supply is null)">Удалить</button> |
-            <a href="/supplies">Назад к списку</a>
+            <a href=@($"/supplies?supplierid={SupplierId}")>Назад к списку поставок @SupplierNamePlaceholder</a>
         </EditForm>
     }
 </div>
@@ -49,10 +49,22 @@
     [SupplyParameterFromQuery]
     private int SupplyId { get; set; }
 
+    [SupplyParameterFromQuery]
+    private int? SupplierId { get; set; }
+
+    private string SupplierNamePlaceholder = string.Empty;
+
+    private List<Flower>? flowers;
+    private List<Supplier>? suppliers;
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
         supply = await context.Supplies.FirstOrDefaultAsync(m => m.SupplyId == SupplyId);
+        flowers = await context.Flowers.ToListAsync();
+        suppliers = await context.Suppliers.ToListAsync();
+
+        SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
 
         if (supply is null)
         {

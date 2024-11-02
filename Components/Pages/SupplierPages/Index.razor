@@ -22,6 +22,7 @@
     <PropertyColumn Title="ФИО директора" Property="supplier => supplier.DirectorName" />
 
     <TemplateColumn Context="supplier">
+        <a href="@($"supplies?supplierid={supplier.SupplierId}")">Поставки</a> |
         <a href="@($"suppliers/edit?supplierid={supplier.SupplierId}")">Редактировать</a> |
         <a href="@($"suppliers/details?supplierid={supplier.SupplierId}")">Детали</a> |
         <a href="@($"suppliers/delete?supplierid={supplier.SupplierId}")">Удалить</a>

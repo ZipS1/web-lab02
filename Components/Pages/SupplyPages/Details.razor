@@ -6,7 +6,7 @@
 
 <PageTitle>Детали поставки</PageTitle>
 
-<h1>Детали поставки @SupplierNamePlaceholder</h1>
+<h1>Детали поставки @SupplierNamePlaceholder @FlowerNamePlaceholder</h1>
 
 <div>
     <hr />
@@ -28,8 +28,8 @@
             <dd class="col-sm-10">@(suppliers!.FirstOrDefault(s => s.SupplierId == supply.SupplierId)!.FullName)</dd>
         </dl>
         <div>
-            <a href="@($"/supplies/edit?supplyid={supply.SupplyId}&supplierid={supply.SupplierId}")">Редактировать</a> |
-            <a href="@($"/supplies")">Назад к списку поставок @SupplierNamePlaceholder</a>
+            <a href="@($"/supplies/edit?supplyid={supply.SupplyId}&supplierid={SupplierId}&flowerid={FlowerId}")">Редактировать</a> |
+            <a href="@($"/supplies?supplierid={SupplierId}&flowerid={FlowerId}")">Назад к списку поставок @SupplierNamePlaceholder @FlowerNamePlaceholder</a>
         </div>
     }
 </div>
@@ -43,7 +43,11 @@
     [SupplyParameterFromQuery]
     public int? SupplierId { get; set; }
 
+    [SupplyParameterFromQuery]
+    private int? FlowerId { get; set; }
+
     private string SupplierNamePlaceholder = string.Empty;
+    private string FlowerNamePlaceholder = string.Empty;
 
     private List<Flower>? flowers;
     private List<Supplier>? suppliers;
@@ -57,7 +61,7 @@
         suppliers = await context.Suppliers.ToListAsync();
 
         SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
-
+        FlowerNamePlaceholder = FlowerId is null ? "" : $"({context.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
 
         if (supply is null)
         {

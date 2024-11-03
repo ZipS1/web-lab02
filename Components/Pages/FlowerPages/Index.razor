@@ -23,6 +23,7 @@
     <PropertyColumn Title="Доп. сведения" Property="flower => flower.Details" />
 
     <TemplateColumn Context="flower">
+        <a href="@($"supplies?flowerid={flower.FlowerId}")">Поставки</a> |
         <a href="@($"flowers/edit?flowerid={flower.FlowerId}")">Редактировать</a> |
         <a href="@($"flowers/details?flowerid={flower.FlowerId}")">Детали</a> |
         <a href="@($"flowers/delete?flowerid={flower.FlowerId}")">Удалить</a>

@@ -6,7 +6,7 @@
 
 <PageTitle>Создание поставки</PageTitle>
 
-<h1>Создание поставки @SupplierNamePlaceholder</h1>
+<h1>Создание поставки @SupplierNamePlaceholder @FlowerNamePlaceholder</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -15,13 +15,22 @@
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
                 <label for="flowerid" class="form-label">Цветок:</label>
-                <InputSelect id="flowerid" @bind-Value="Supply.FlowerId" class="form-select">
-                    <option value="">Выберите цветок</option>
-                    @foreach (var flower in flowers!)
-                    {
-                        <option value="@flower.FlowerId">@flower.Name</option>
-                    }
-                </InputSelect>
+                @if (FlowerId is null)
+                {
+                    <InputSelect id="flowerid" @bind-Value="Supply.FlowerId" class="form-select">
+                        <option value="">Выберите цветок</option>
+                        @foreach (var flower in flowers!)
+                        {
+                            <option value="@flower.FlowerId">@flower.Name</option>
+                        }
+                    </InputSelect>
+                }
+                else
+                {
+                    <InputSelect id="supplierid" @bind-Value="Supply.SupplierId" class="form-select" disabled>
+                        <option value="@FlowerId">@flowers!.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name</option>
+                    </InputSelect>
+                }
                 <ValidationMessage For="() => Supply.FlowerId" class="text-danger" />
             </div>     
             <div class="mb-3">
@@ -63,11 +72,26 @@
     </div>
 </div>
 
-<div>
-    <a href="@($"/supplies?supplierid={SupplierId}")">Назад к списку поставок @SupplierNamePlaceholder</a>
-</div>
 
-@if (SupplierId is not null)
+@if  (SupplierId is null && FlowerId is null)
+{
+    <div>
+        <a href="@($"/supplies")">Назад к списку поставок</a>
+    </div>
+}
+else if (SupplierId is not null)
+{
+    <div>
+        <a href="@($"/supplies?supplierid={SupplierId}")">Назад к списку поставок @SupplierNamePlaceholder</a>
+    </div>
+} else if (FlowerId is not null)
+{
+    <div>
+        <a href="@($"/supplies?flowerid={FlowerId}")">Назад к списку поставок @FlowerNamePlaceholder</a>
+    </div>
+}
+
+@if (SupplierId is not null || FlowerId is not null)
 {
     <div>
         <a href="@($"/supplies")">Назад к полному списку поставок</a>
@@ -81,7 +105,11 @@
     [SupplyParameterFromQuery]
     private int? SupplierId { get; set; }
 
+    [SupplyParameterFromQuery]
+    private int? FlowerId { get; set; }
+
     private string SupplierNamePlaceholder = string.Empty;
+    private string FlowerNamePlaceholder = string.Empty;
 
     private List<Flower>? flowers;
     private List<Supplier>? suppliers;
@@ -96,6 +124,7 @@
         suppliers = context.Suppliers.ToList();
 
         SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
+        FlowerNamePlaceholder = FlowerId is null ? "" : $"({context.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
 
         return Task.CompletedTask;
     }

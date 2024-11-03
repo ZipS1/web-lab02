@@ -9,23 +9,36 @@
 
 <PageTitle>Список поставок</PageTitle>
 
-<h1>Список поставок @SupplierNamePlaceholder</h1>
+<h1>Список поставок @SupplierNamePlaceholder @FlowerNamePlaceholder</h1>
+
+@if (FlowerId is not null)
+{
+    <p>
+        <a href="@($"flowers")">К списку цветов</a>
+    </p>
+}
+
 @if (SupplierId is not null)
 {
     <p>
         <a href="@($"suppliers")">К списку поставщиков</a>
     </p>
+}
 
+@if (SupplierId is not null || FlowerId is not null)
+{
     <p>
         <a href="@($"supplies")">К полному списку поставок</a>
     </p>
 }
 
 <p>
-    <a href="@($"supplies/create?supplierid={SupplierId}")">Создать</a>
+    <a href="@($"supplies/create?supplierid={SupplierId}&flowerid={FlowerId}")">Создать</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Supplies.Where(s => SupplierId == null || s.SupplierId == SupplierId)">
+<QuickGrid Class="table" Items="context.Supplies
+                                        .Where(s => SupplierId == null || s.SupplierId == SupplierId)
+                                        .Where(s => FlowerId == null || s.FlowerId == FlowerId)">
     <PropertyColumn Title="Цветок" Property="@(supply => $"{context.Flowers.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name}")" />
     <PropertyColumn Title="Дата поставки" Property="supply => supply.DeliveryDate.ToShortDateString()" />
     <PropertyColumn Title="Цена за единицу" Property="supply => supply.PricePerUnit" />
@@ -33,9 +46,9 @@
     <PropertyColumn Title="Поставщик" Property="@(supply => $"{context.Suppliers.FirstOrDefault(f => f.SupplierId == supply.SupplierId)!.FullName}")" />
 
     <TemplateColumn Context="supply">
-        <a href="@($"supplies/edit?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Редактировать</a> |
-        <a href="@($"supplies/details?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Детали</a> |
-        <a href="@($"supplies/delete?supplyid={supply.SupplyId}&supplierid={SupplierId}")">Удалить</a>
+        <a href="@($"supplies/edit?supplyid={supply.SupplyId}&supplierid={SupplierId}&flowerid={FlowerId}")">Редактировать</a> |
+        <a href="@($"supplies/details?supplyid={supply.SupplyId}&supplierid={SupplierId}&flowerid={FlowerId}")">Детали</a> |
+        <a href="@($"supplies/delete?supplyid={supply.SupplyId}&supplierid={SupplierId}&flowerid={FlowerId}")">Удалить</a>
     </TemplateColumn>
 </QuickGrid>
 
@@ -43,7 +56,11 @@
     [SupplyParameterFromQuery]
     public int? SupplierId { get; set; }
 
+    [SupplyParameterFromQuery]
+    public int? FlowerId { get; set; }
+
     private string SupplierNamePlaceholder = string.Empty;
+    private string FlowerNamePlaceholder = string.Empty;
 
     private AppDbContext context = default!;
 
@@ -51,6 +68,7 @@
     {
         context = DbFactory.CreateDbContext();
         SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
+        FlowerNamePlaceholder = FlowerId is null ? "" : $"({context.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

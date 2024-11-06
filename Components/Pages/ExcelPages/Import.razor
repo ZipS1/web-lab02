@@ -1,7 +1,21 @@
 ﻿@page "/import"
 
-<h3>Import</h3>
+<h3>Импорт из Excel</h3>
+
+<p>
+    <label>
+        Укажите файл Excel для импорта:
+        <InputFile OnChange="LoadFile" />
+    </label>
+</p>
 
 @code {
-
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        IBrowserFile? browserFile = e.File;
+        if (browserFile == null)
+        {
+            return;
+        }
+    }
 }

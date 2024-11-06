@@ -1,7 +1,41 @@
 ﻿@page "/export"
+@using ClosedXML.Excel
+@using Microsoft.EntityFrameworkCore
+@using lab02.Database
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime js
 
-<h3>Export</h3>
+<h3>Экспорт в Excel</h3>
+
+<button type="button" class="btn btn-success mb-2" @onclick="ExportExcel">Нажмите для экспорта</button>
+
+@if (exportInProgress)
+{
+    <p><em>Загрузка...</em></p>
+}
 
 @code {
+    private bool exportInProgress = false;
 
+    private async Task ExportExcel()
+    {
+        exportInProgress = true;
+        byte[] ExcelStream = await GenerateExcelStreamFromData();
+        string date = DateTime.Now.ToShortDateString().Replace(".", string.Empty);
+
+        await js.InvokeVoidAsync("BlazorDownloadFile", $"flowers-export-{date}.xls", ExcelStream);
+        exportInProgress = false;
+    }
+
+    private async Task<byte[]> GenerateExcelStreamFromData()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        using var workbook = new XLWorkbook();
+
+        // TODO
+
+        MemoryStream stream = new();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
 }

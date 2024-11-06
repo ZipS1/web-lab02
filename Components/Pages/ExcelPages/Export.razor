@@ -20,22 +20,89 @@
     private async Task ExportExcel()
     {
         exportInProgress = true;
-        byte[] ExcelStream = await GenerateExcelStreamFromData();
-        string date = DateTime.Now.ToShortDateString().Replace(".", string.Empty);
+        byte[] ExcelStream = GenerateExcelStream();
+        string date = DateTime.Now.ToString("ddMMyy-hhmmss");
 
         await js.InvokeVoidAsync("BlazorDownloadFile", $"flowers-export-{date}.xls", ExcelStream);
         exportInProgress = false;
     }
 
-    private async Task<byte[]> GenerateExcelStreamFromData()
+    private byte[] GenerateExcelStream()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        using var workbook = new XLWorkbook();
-
-        // TODO
-
+        CreateWorkbook(out XLWorkbook workbook);
         MemoryStream stream = new();
         workbook.SaveAs(stream);
         return stream.ToArray();
+    }
+
+    private void CreateWorkbook(out XLWorkbook workbook)
+    {
+        workbook = new XLWorkbook();
+        using AppDbContext context = DbFactory.CreateDbContext();
+
+        #region FlowersList
+        var flowersWs = workbook.AddWorksheet("Цветы");
+        flowersWs.Cell(1, 1).Value = "Имя";
+        flowersWs.Cell(1, 2).Value = "Сорт";
+        flowersWs.Cell(1, 3).Value = "Ср. высота";
+        flowersWs.Cell(1, 4).Value = "Тип цветка";
+        flowersWs.Cell(1, 5).Value = "Цветет?";
+        flowersWs.Cell(1, 6).Value = "Доп. сведения";
+        flowersWs.Row(1).Style.Font.Bold = true;
+
+        int rowCounter = 2;
+        foreach (var flower in context.Flowers)
+        {
+            flowersWs.Cell(rowCounter, 1).Value = flower.Name;
+            flowersWs.Cell(rowCounter, 2).Value = flower.Kind;
+            flowersWs.Cell(rowCounter, 3).Value = flower.AverageHeight;
+            flowersWs.Cell(rowCounter, 4).Value = flower.LeafType;
+            flowersWs.Cell(rowCounter, 5).Value = flower.CanBloom ? "Да" : "Нет";
+            flowersWs.Cell(rowCounter, 6).Value = flower.Details;
+            rowCounter++;
+        }
+        #endregion
+
+        #region SuppliersList
+        var suppliersWs = workbook.AddWorksheet("Поставщики");
+        suppliersWs.Cell(1, 1).Value = "Полное наименование";
+        suppliersWs.Cell(1, 2).Value = "Сокращенное наименование";
+        suppliersWs.Cell(1, 3).Value = "Юридический адрес";
+        suppliersWs.Cell(1, 4).Value = "Номер телефона";
+        suppliersWs.Cell(1, 5).Value = "ФИО директора";
+        suppliersWs.Row(1).Style.Font.Bold = true;
+
+        rowCounter = 2;
+        foreach (var supplier in context.Suppliers)
+        {
+            suppliersWs.Cell(rowCounter, 1).Value = supplier.FullName;
+            suppliersWs.Cell(rowCounter, 2).Value = supplier.ShortName;
+            suppliersWs.Cell(rowCounter, 3).Value = supplier.LegalAddress;
+            suppliersWs.Cell(rowCounter, 4).Value = supplier.PhoneNumber;
+            suppliersWs.Cell(rowCounter, 5).Value = supplier.DirectorName;
+            rowCounter++;
+        }
+        #endregion
+
+        #region SuppliesList
+        var suppliesWs = workbook.AddWorksheet("Поставки");
+        suppliesWs.Cell(1, 1).Value = "Цветок";
+        suppliesWs.Cell(1, 2).Value = "Дата поставки";
+        suppliesWs.Cell(1, 3).Value = "Цена за единицу";
+        suppliesWs.Cell(1, 4).Value = "Количество";
+        suppliesWs.Cell(1, 5).Value = "Поставщик";
+        suppliesWs.Row(1).Style.Font.Bold = true;
+
+        rowCounter = 2;
+        foreach (var supply in context.Supplies)
+        {
+            suppliesWs.Cell(rowCounter, 1).Value = supply.Flower!.Name;
+            suppliesWs.Cell(rowCounter, 2).Value = supply.DeliveryDate.ToLongDateString();
+            suppliesWs.Cell(rowCounter, 3).Value = supply.PricePerUnit;
+            suppliesWs.Cell(rowCounter, 4).Value = supply.Units;
+            suppliesWs.Cell(rowCounter, 5).Value = supply.Supplier!.FullName;
+            rowCounter++;
+        }
+        #endregion
     }
 }

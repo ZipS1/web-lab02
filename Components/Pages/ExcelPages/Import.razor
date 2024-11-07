@@ -1,21 +1,117 @@
 ﻿@page "/import"
+@using ClosedXML.Excel
+@using Microsoft.EntityFrameworkCore
+@using lab02.Database
+@using lab02.Models
+@inject IDbContextFactory<AppDbContext> DbFactory;
 
 <h3>Импорт из Excel</h3>
 
 <p>
     <label>
         Укажите файл Excel для импорта:
-        <InputFile OnChange="LoadFile" />
+        <br/>
+        <InputFile class="btn btn-success mb-2" OnChange="HandleImport" />
     </label>
 </p>
 
+@if (isLoading)
+{
+    <p><em>Загрузка...</em></p>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <h5>Ошибка: @errorMessage</h5>
+}
+
 @code {
-    private async Task LoadFile(InputFileChangeEventArgs e)
+    private const int MAX_FILESIZE = 5 * 1024 * 1024; // 5 MB
+
+    private List<Flower> flowers = new();
+    private List<Supplier> suppliers = new();
+    private List<Supply> supplies = new();
+
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    private async Task HandleImport(InputFileChangeEventArgs e)
     {
+        isLoading = true;
+
         IBrowserFile? browserFile = e.File;
         if (browserFile == null)
         {
+            errorMessage = "Файл не выбран";
             return;
         }
+
+        if (browserFile.Size > MAX_FILESIZE)
+        {
+            errorMessage = "Превышен максимальный размер файла (5 МБ)";
+            return;
+        }
+
+        using var fileStream = browserFile.OpenReadStream(MAX_FILESIZE);
+        using var memoryStream = new MemoryStream();
+        await fileStream.CopyToAsync(memoryStream);
+
+        try
+        {
+            using XLWorkbook workbook = new XLWorkbook(memoryStream);
+            await CommitFromWorkbook(workbook);
+        } catch (Exception err)
+        {
+            errorMessage = err.Message;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task CommitFromWorkbook(XLWorkbook workbook)
+    {
+        foreach (IXLWorksheet worksheet in workbook.Worksheets)
+        {
+            switch (worksheet.Name)
+            {
+                case "Цветы":
+                    flowers = await HandleFlowersWorksheet(worksheet);
+                    break;
+                case "Поставщики":
+                    suppliers = await HandleSuppliersWorksheet(worksheet);
+                    break;
+                case "Поставки":
+                    supplies = await HandleSuppliesWorksheet(worksheet);
+                    break;
+            }
+        }
+
+        using var context = await DbFactory.CreateDbContextAsync();
+        using (var transaction = context.Database.BeginTransaction())
+        {
+            await context.AddRangeAsync(flowers);
+            await context.AddRangeAsync(suppliers);
+            await context.AddRangeAsync(supplies);
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+    }
+
+    private async Task<List<Flower>> HandleFlowersWorksheet(IXLWorksheet flowersWorksheet)
+    {
+        // TODO
+        return new();
+    }
+
+    private async Task<List<Supplier>> HandleSuppliersWorksheet(IXLWorksheet suppliersWorksheet)
+    {
+        // TODO
+        return new();
+    }
+
+    private async Task<List<Supply>> HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
+    {
+        // TODO
+        return new();
     }
 }

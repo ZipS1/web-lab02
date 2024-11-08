@@ -70,29 +70,33 @@
 
     private async Task CommitFromWorkbook(XLWorkbook workbook)
     {
-        foreach (IXLWorksheet worksheet in workbook.Worksheets)
-        {
-            switch (worksheet.Name)
-            {
-                case "Цветы":
-                    HandleFlowersWorksheet(worksheet);
-                    break;
-                case "Поставщики":
-                    HandleSuppliersWorksheet(worksheet);
-                    break;
-                case "Поставки":
-                    await HandleSuppliesWorksheet(worksheet);
-                    break;
-            }
-        }
-
         using var context = await DbFactory.CreateDbContextAsync();
         using (var transaction = context.Database.BeginTransaction())
         {
-            await context.AddRangeAsync(flowers);
-            await context.AddRangeAsync(suppliers);
-            await context.AddRangeAsync(supplies);
-            await context.SaveChangesAsync();
+            IXLWorksheet? flowersWorksheet = workbook.Worksheets.FirstOrDefault(w => w.Name == "Цветы");
+            if (flowersWorksheet is not null)
+            {
+                HandleFlowersWorksheet(flowersWorksheet);
+                await context.AddRangeAsync(flowers);
+                await context.SaveChangesAsync();
+            }
+
+            IXLWorksheet? suppliersWorksheet = workbook.Worksheets.FirstOrDefault(w => w.Name == "Поставщики");
+            if (suppliersWorksheet is not null)
+            {
+                HandleSuppliersWorksheet(suppliersWorksheet);
+                await context.AddRangeAsync(suppliers);
+                await context.SaveChangesAsync();
+            }
+
+            IXLWorksheet? suppliesWorksheet = workbook.Worksheets.FirstOrDefault(w => w.Name == "Поставки");
+            if (suppliesWorksheet is not null)
+            {
+                HandleSuppliesWorksheet(suppliesWorksheet);
+                await context.AddRangeAsync(supplies);
+                await context.SaveChangesAsync();
+            }
+
             await transaction.CommitAsync();
         }
     }
@@ -104,7 +108,7 @@
             Flower flower = new();
             flower.Name = flowersWorksheet.Cell(i, 1).Value.ToString();
             flower.Kind = flowersWorksheet.Cell(i, 2).Value.ToString();
-            flower.AverageHeight = (float)flowersWorksheet.Cell(i, 3).Value.GetNumber();
+            flower.AverageHeight = Convert.ToSingle(flowersWorksheet.Cell(i, 3).Value.GetNumber());
             flower.LeafType = flowersWorksheet.Cell(i, 4).Value.ToString();
             flower.CanBloom = flowersWorksheet.Cell(i, 5).Value.ToString() == "Да";
             flower.Details = flowersWorksheet.Cell(i, 6).Value.ToString();
@@ -126,22 +130,21 @@
         }
     }
 
-    private async Task HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
+    private void HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
     {
-        using var context = await DbFactory.CreateDbContextAsync();
         for (int i = 2; !suppliesWorksheet.Row(i).IsEmpty(); i++)
         {
             Supply supply = new();
 
             string flowerNameFromTable = suppliesWorksheet.Cell(i, 1).Value.ToString();
-            supply.FlowerId = context.Flowers.FirstOrDefaultAsync(f => f.Name == flowerNameFromTable).Result!.FlowerId;
+            supply.FlowerId = flowers.FirstOrDefault(f => f.Name == flowerNameFromTable)!.FlowerId;
 
             supply.DeliveryDate = DateTime.ParseExact(suppliesWorksheet.Cell(i, 2).Value.ToString(), "d", null);
-            supply.PricePerUnit = (float)suppliesWorksheet.Cell(i, 3).Value.GetNumber();
+            supply.PricePerUnit = Convert.ToSingle(suppliesWorksheet.Cell(i, 3).Value.GetNumber());
             supply.Units = Convert.ToInt32(suppliesWorksheet.Cell(i, 4).Value.GetNumber());
 
             string supplierNameFromTable = suppliesWorksheet.Cell(i, 5).Value.ToString();
-            supply.SupplierId = context.Suppliers.FirstOrDefaultAsync(s => s.FullName == supplierNameFromTable).Result!.SupplierId;
+            supply.SupplierId = suppliers.FirstOrDefault(s => s.FullName == supplierNameFromTable)!.SupplierId;
             supplies.Add(supply);
         }
     }

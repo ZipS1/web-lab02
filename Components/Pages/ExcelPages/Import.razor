@@ -75,13 +75,13 @@
             switch (worksheet.Name)
             {
                 case "Цветы":
-                    flowers = await HandleFlowersWorksheet(worksheet);
+                    HandleFlowersWorksheet(worksheet);
                     break;
                 case "Поставщики":
-                    suppliers = await HandleSuppliersWorksheet(worksheet);
+                    HandleSuppliersWorksheet(worksheet);
                     break;
                 case "Поставки":
-                    supplies = await HandleSuppliesWorksheet(worksheet);
+                    await HandleSuppliesWorksheet(worksheet);
                     break;
             }
         }
@@ -97,21 +97,52 @@
         }
     }
 
-    private async Task<List<Flower>> HandleFlowersWorksheet(IXLWorksheet flowersWorksheet)
+    private void HandleFlowersWorksheet(IXLWorksheet flowersWorksheet)
     {
-        // TODO
-        return new();
+        for (int i = 2; !flowersWorksheet.Row(i).IsEmpty(); i++)
+        {
+            Flower flower = new();
+            flower.Name = flowersWorksheet.Cell(i, 1).Value.ToString();
+            flower.Kind = flowersWorksheet.Cell(i, 2).Value.ToString();
+            flower.AverageHeight = (float)flowersWorksheet.Cell(i, 3).Value.GetNumber();
+            flower.LeafType = flowersWorksheet.Cell(i, 4).Value.ToString();
+            flower.CanBloom = flowersWorksheet.Cell(i, 5).Value.ToString() == "Да";
+            flower.Details = flowersWorksheet.Cell(i, 6).Value.ToString();
+            flowers.Add(flower);
+        }
     }
 
-    private async Task<List<Supplier>> HandleSuppliersWorksheet(IXLWorksheet suppliersWorksheet)
+    private void HandleSuppliersWorksheet(IXLWorksheet suppliersWorksheet)
     {
-        // TODO
-        return new();
+        for (int i = 2; !suppliersWorksheet.Row(i).IsEmpty(); i++)
+        {
+            Supplier supplier = new();
+            supplier.FullName = suppliersWorksheet.Cell(i, 1).Value.ToString();
+            supplier.ShortName = suppliersWorksheet.Cell(i, 2).Value.ToString();
+            supplier.LegalAddress = suppliersWorksheet.Cell(i, 3).Value.ToString();
+            supplier.PhoneNumber = suppliersWorksheet.Cell(i, 4).Value.ToString();
+            supplier.DirectorName = suppliersWorksheet.Cell(i, 5).Value.ToString();
+            suppliers.Add(supplier);
+        }
     }
 
-    private async Task<List<Supply>> HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
+    private async Task HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
     {
-        // TODO
-        return new();
+        using var context = await DbFactory.CreateDbContextAsync();
+        for (int i = 2; !suppliesWorksheet.Row(i).IsEmpty(); i++)
+        {
+            Supply supply = new();
+
+            string flowerNameFromTable = suppliesWorksheet.Cell(i, 1).Value.ToString();
+            supply.FlowerId = context.Flowers.FirstOrDefaultAsync(f => f.Name == flowerNameFromTable).Result!.FlowerId;
+
+            supply.DeliveryDate = DateTime.ParseExact(suppliesWorksheet.Cell(i, 2).Value.ToString(), "d", null);
+            supply.PricePerUnit = (float)suppliesWorksheet.Cell(i, 3).Value.GetNumber();
+            supply.Units = Convert.ToInt32(suppliesWorksheet.Cell(i, 4).Value.GetNumber());
+
+            string supplierNameFromTable = suppliesWorksheet.Cell(i, 5).Value.ToString();
+            supply.SupplierId = context.Suppliers.FirstOrDefaultAsync(s => s.FullName == supplierNameFromTable).Result!.SupplierId;
+            supplies.Add(supply);
+        }
     }
 }

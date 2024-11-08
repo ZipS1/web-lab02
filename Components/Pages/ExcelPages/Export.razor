@@ -23,7 +23,7 @@
         byte[] ExcelStream = GenerateExcelStream();
         string date = DateTime.Now.ToString("ddMMyy-hhmmss");
 
-        await js.InvokeVoidAsync("BlazorDownloadFile", $"flowers-export-{date}.xls", ExcelStream);
+        await js.InvokeVoidAsync("BlazorDownloadFile", $"flowers-export-{date}.xlsx", ExcelStream);
         exportInProgress = false;
     }
 
@@ -97,7 +97,7 @@
         foreach (var supply in context.Supplies)
         {
             suppliesWs.Cell(rowCounter, 1).Value = supply.Flower!.Name;
-            suppliesWs.Cell(rowCounter, 2).Value = supply.DeliveryDate.ToLongDateString();
+            suppliesWs.Cell(rowCounter, 2).Value = supply.DeliveryDate.ToShortDateString();
             suppliesWs.Cell(rowCounter, 3).Value = supply.PricePerUnit;
             suppliesWs.Cell(rowCounter, 4).Value = supply.Units;
             suppliesWs.Cell(rowCounter, 5).Value = supply.Supplier!.FullName;

@@ -18,11 +18,15 @@
 @if (isLoading)
 {
     <p><em>Загрузка...</em></p>
-}
-
-@if (!string.IsNullOrEmpty(errorMessage))
+} else if (!string.IsNullOrEmpty(parsingErrorMessage))
+{
+    <h5>Ошибка обработки Excel: @parsingErrorMessage</h5>
+} else if (!string.IsNullOrEmpty(errorMessage))
 {
     <h5>Ошибка: @errorMessage</h5>
+} else if (isImportedSuccessfully)
+{
+    <h5>Импорт выполнен успешно</h5>
 }
 
 @code {
@@ -33,11 +37,14 @@
     private List<Supply> supplies = new();
 
     private bool isLoading = false;
+    private bool isImportedSuccessfully = false;
     private string errorMessage = string.Empty;
+    private string parsingErrorMessage = string.Empty;
 
     private async Task HandleImport(InputFileChangeEventArgs e)
     {
         isLoading = true;
+        isImportedSuccessfully = false;
 
         IBrowserFile? browserFile = e.File;
         if (browserFile == null)
@@ -63,9 +70,11 @@
         } catch (Exception err)
         {
             errorMessage = err.Message;
+        } finally
+        {
+            isLoading = false;
         }
-
-        isLoading = false;
+        isImportedSuccessfully = true;
     }
 
     private async Task CommitFromWorkbook(XLWorkbook workbook)
@@ -103,49 +112,73 @@
 
     private void HandleFlowersWorksheet(IXLWorksheet flowersWorksheet)
     {
-        for (int i = 2; !flowersWorksheet.Row(i).IsEmpty(); i++)
+        int i = 0;
+        try 
         {
-            Flower flower = new();
-            flower.Name = flowersWorksheet.Cell(i, 1).Value.ToString();
-            flower.Kind = flowersWorksheet.Cell(i, 2).Value.ToString();
-            flower.AverageHeight = Convert.ToSingle(flowersWorksheet.Cell(i, 3).Value.GetNumber());
-            flower.LeafType = flowersWorksheet.Cell(i, 4).Value.ToString();
-            flower.CanBloom = flowersWorksheet.Cell(i, 5).Value.ToString() == "Да";
-            flower.Details = flowersWorksheet.Cell(i, 6).Value.ToString();
-            flowers.Add(flower);
+            for (i = 2; !flowersWorksheet.Row(i).IsEmpty(); i++)
+            {
+                Flower flower = new();
+                flower.Name = flowersWorksheet.Cell(i, 1).Value.ToString();
+                flower.Kind = flowersWorksheet.Cell(i, 2).Value.ToString();
+                flower.AverageHeight = Convert.ToSingle(flowersWorksheet.Cell(i, 3).Value.GetNumber());
+                flower.LeafType = flowersWorksheet.Cell(i, 4).Value.ToString();
+                flower.CanBloom = flowersWorksheet.Cell(i, 5).Value.ToString() == "Да";
+                flower.Details = flowersWorksheet.Cell(i, 6).Value.ToString();
+                flowers.Add(flower);
+            }
+        } catch (Exception)
+        {
+            parsingErrorMessage = $"Лист \"Цветы\", строка {i}";
+            throw;
         }
     }
 
     private void HandleSuppliersWorksheet(IXLWorksheet suppliersWorksheet)
     {
-        for (int i = 2; !suppliersWorksheet.Row(i).IsEmpty(); i++)
+        int i = 0;
+        try 
         {
-            Supplier supplier = new();
-            supplier.FullName = suppliersWorksheet.Cell(i, 1).Value.ToString();
-            supplier.ShortName = suppliersWorksheet.Cell(i, 2).Value.ToString();
-            supplier.LegalAddress = suppliersWorksheet.Cell(i, 3).Value.ToString();
-            supplier.PhoneNumber = suppliersWorksheet.Cell(i, 4).Value.ToString();
-            supplier.DirectorName = suppliersWorksheet.Cell(i, 5).Value.ToString();
-            suppliers.Add(supplier);
+            for (i = 2; !suppliersWorksheet.Row(i).IsEmpty(); i++)
+            {
+                Supplier supplier = new();
+                supplier.FullName = suppliersWorksheet.Cell(i, 1).Value.ToString();
+                supplier.ShortName = suppliersWorksheet.Cell(i, 2).Value.ToString();
+                supplier.LegalAddress = suppliersWorksheet.Cell(i, 3).Value.ToString();
+                supplier.PhoneNumber = suppliersWorksheet.Cell(i, 4).Value.ToString();
+                supplier.DirectorName = suppliersWorksheet.Cell(i, 5).Value.ToString();
+                suppliers.Add(supplier);
+            }
+        } catch (Exception)
+        {
+            parsingErrorMessage = $"Лист \"Поставщики\", строка {i}";
+            throw;
         }
     }
 
     private void HandleSuppliesWorksheet(IXLWorksheet suppliesWorksheet)
     {
-        for (int i = 2; !suppliesWorksheet.Row(i).IsEmpty(); i++)
+        int i = 0;
+        try
         {
-            Supply supply = new();
+            for (i = 2; !suppliesWorksheet.Row(i).IsEmpty(); i++)
+            {
+                Supply supply = new();
 
-            string flowerNameFromTable = suppliesWorksheet.Cell(i, 1).Value.ToString();
-            supply.FlowerId = flowers.FirstOrDefault(f => f.Name == flowerNameFromTable)!.FlowerId;
+                string flowerNameFromTable = suppliesWorksheet.Cell(i, 1).Value.ToString();
+                supply.FlowerId = flowers.FirstOrDefault(f => f.Name == flowerNameFromTable)!.FlowerId;
 
-            supply.DeliveryDate = DateTime.ParseExact(suppliesWorksheet.Cell(i, 2).Value.ToString(), "d", null);
-            supply.PricePerUnit = Convert.ToSingle(suppliesWorksheet.Cell(i, 3).Value.GetNumber());
-            supply.Units = Convert.ToInt32(suppliesWorksheet.Cell(i, 4).Value.GetNumber());
+                supply.DeliveryDate = DateTime.ParseExact(suppliesWorksheet.Cell(i, 2).Value.ToString(), "d", null);
+                supply.PricePerUnit = Convert.ToSingle(suppliesWorksheet.Cell(i, 3).Value.GetNumber());
+                supply.Units = Convert.ToInt32(suppliesWorksheet.Cell(i, 4).Value.GetNumber());
 
-            string supplierNameFromTable = suppliesWorksheet.Cell(i, 5).Value.ToString();
-            supply.SupplierId = suppliers.FirstOrDefault(s => s.FullName == supplierNameFromTable)!.SupplierId;
-            supplies.Add(supply);
+                string supplierNameFromTable = suppliesWorksheet.Cell(i, 5).Value.ToString();
+                supply.SupplierId = suppliers.FirstOrDefault(s => s.FullName == supplierNameFromTable)!.SupplierId;
+                supplies.Add(supply);
+            }
+        } catch (Exception)
+        {
+            parsingErrorMessage = $"Лист \"Поставки\", строка {i}";
+            throw;
         }
     }
 }

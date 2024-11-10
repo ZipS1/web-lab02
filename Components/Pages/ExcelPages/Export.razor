@@ -1,5 +1,8 @@
 ﻿@page "/export"
+@attribute [Authorize(Roles = "Admin")]
+
 @using ClosedXML.Excel
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using lab02.Database
 @inject IDbContextFactory<AppDbContext> DbFactory

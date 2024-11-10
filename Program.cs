@@ -26,15 +26,15 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    //options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-    options
-        .UseInMemoryDatabase(databaseName: "flowers_db")
-        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    //options
+    //    .UseInMemoryDatabase(databaseName: "flowers_db")
+    //    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
 );
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseInMemoryDatabase(databaseName: "flowers_db"), ServiceLifetime.Scoped
-    //options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped
+    //options.UseInMemoryDatabase(databaseName: "flowers_db"), ServiceLifetime.Scoped
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped
 );
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
@@ -57,6 +57,10 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 builder.Services.AddSingleton<IEmailSender<AppUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
+
+await using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+var options = scope.ServiceProvider.GetRequiredService<DbContextOptions<AppDbContext>>();
+await DbInitializer.EnsureDbCreatedAndSeededAsync(options);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

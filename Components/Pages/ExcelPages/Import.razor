@@ -1,5 +1,8 @@
 ﻿@page "/import"
+@attribute [Authorize(Roles = "Admin")]
+
 @using ClosedXML.Excel
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using lab02.Database
 @using lab02.Models

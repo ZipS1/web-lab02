@@ -16,41 +16,41 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="flowers">
-                <span class="bi flower-image" aria-hidden="true"></span> Цветы
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="suppliers">
-                <span class="bi supplier-image" aria-hidden="true"></span> Поставщики
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="supplies">
-                <span class="bi supply-image" aria-hidden="true"></span> Поставки
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="import">
-                <span class="bi excel-import-image" aria-hidden="true"></span> Импорт из Excel
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="export">
-                <span class="bi excel-export-image" aria-hidden="true"></span> Экспорт в Excel
-            </NavLink>
-        </div>
-
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="flowers">
+                        <span class="bi flower-image" aria-hidden="true"></span> Цветы
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="suppliers">
+                        <span class="bi supplier-image" aria-hidden="true"></span> Поставщики
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="supplies">
+                        <span class="bi supply-image" aria-hidden="true"></span> Поставки
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="import">
+                        <span class="bi excel-import-image" aria-hidden="true"></span> Импорт из Excel
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="export">
+                        <span class="bi excel-export-image" aria-hidden="true"></span> Экспорт в Excel
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi profile-image" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -58,7 +58,7 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            <span class="bi logout-image" aria-hidden="true"></span> Выйти из аккаунта
                         </button>
                     </form>
                 </div>
@@ -66,12 +66,12 @@
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <span class="bi registration-image" aria-hidden="true"></span> Регистрация
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <span class="bi login-image" aria-hidden="true"></span> Вход
                     </NavLink>
                 </div>
             </NotAuthorized>

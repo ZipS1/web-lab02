@@ -2,18 +2,12 @@
 @attribute [Authorize]
 
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using System.Security.Claims
-@using lab02.Models
 @using lab02.Database
-@using lab02.Models.Account
 @implements IAsyncDisposable
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
-@inject UserManager<AppUser> UserManager
-@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Список поставок</PageTitle>
 
@@ -32,13 +26,14 @@
         <a href="@($"suppliers")">К списку поставщиков</a>
     </p>
 }
-
-@if ((SupplierId is not null || FlowerId is not null) && userClaims!.IsInRole("Admin"))
-{
-    <p>
-        <a href="@($"supplies")">К полному списку поставок</a>
-    </p>
-}
+<AuthorizeView Roles="Admin">
+    @if (SupplierId is not null || FlowerId is not null)
+    {
+        <p>
+            <a href="@($"supplies")">К полному списку поставок</a>
+        </p>
+    }
+</AuthorizeView>
 
 <p>
     <a href="@($"supplies/create?supplierid={SupplierId}&flowerid={FlowerId}")">Создать</a>
@@ -70,13 +65,11 @@
     private string SupplierNamePlaceholder = string.Empty;
     private string FlowerNamePlaceholder = string.Empty;
 
-    private AppDbContext dbContext = default!;
-    private ClaimsPrincipal? userClaims;
+    private AppDbContext? dbContext;
 
     protected override async Task OnInitializedAsync()
     {
         dbContext = await DbFactory.CreateDbContextAsync();
-        userClaims = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
         await RedirectIfUserIsSupplierAgent();
 
         SupplierNamePlaceholder = SupplierId is null ? "" : dbContext.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
@@ -85,14 +78,7 @@
 
     private async Task RedirectIfUserIsSupplierAgent()
     {
-        var userId = userClaims!.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        AppUser? user = await UserManager.FindByIdAsync(userId!);
-        if (userClaims.IsInRole("SupplierAgent"))
-        {
-            await DisposeAsync();
-            NavigationManager.NavigateTo($"supplies?supplierid={user!.SupplierId}");
-        }
     }
 
-    public async ValueTask DisposeAsync() => await dbContext.DisposeAsync();
+    public async ValueTask DisposeAsync() => await dbContext!.DisposeAsync();
 }

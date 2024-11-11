@@ -1,4 +1,7 @@
 ﻿@page "/supplies/details"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using lab02.Models
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory

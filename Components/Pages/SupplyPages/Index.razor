@@ -1,4 +1,7 @@
 ﻿@page "/supplies"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using lab02.Models

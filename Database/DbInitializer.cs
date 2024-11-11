@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using lab02.Models.Account;
+﻿using lab02.Models.Account;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +29,10 @@ namespace lab02.Database
 
             var rootUser = new AppUser
             {
-                UserName = "root",
+                UserName = "root@email.com",
+                Email = "root@email.com",
+                NormalizedEmail = "ROOT@EMAIL.COM",
+                NormalizedUserName = "ROOT@EMAIL.COM"
             };
 
             var passwordHasher = new PasswordHasher<AppUser>();

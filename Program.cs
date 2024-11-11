@@ -58,9 +58,10 @@ builder.Services.AddSingleton<IEmailSender<AppUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 
-await using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
-var options = scope.ServiceProvider.GetRequiredService<DbContextOptions<AppDbContext>>();
-await DbInitializer.EnsureDbCreatedAndSeededAsync(options);
+await using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope()) {
+    var options = scope.ServiceProvider.GetRequiredService<DbContextOptions<AppDbContext>>();
+    await DbInitializer.EnsureDbCreatedAndSeededAsync(options);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

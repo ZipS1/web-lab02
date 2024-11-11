@@ -2,13 +2,18 @@
 @attribute [Authorize]
 
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Security.Claims
 @using lab02.Models
 @using lab02.Database
+@using lab02.Models.Account
 @implements IAsyncDisposable
 @inject IDbContextFactory<lab02.Database.AppDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject UserManager<AppUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Список поставок</PageTitle>
 
@@ -28,7 +33,7 @@
     </p>
 }
 
-@if (SupplierId is not null || FlowerId is not null)
+@if ((SupplierId is not null || FlowerId is not null) && userClaims!.IsInRole("Admin"))
 {
     <p>
         <a href="@($"supplies")">К полному списку поставок</a>
@@ -39,14 +44,14 @@
     <a href="@($"supplies/create?supplierid={SupplierId}&flowerid={FlowerId}")">Создать</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Supplies
+<QuickGrid Class="table" Items="dbContext.Supplies
                                         .Where(s => SupplierId == null || s.SupplierId == SupplierId)
                                         .Where(s => FlowerId == null || s.FlowerId == FlowerId)">
-    <PropertyColumn Title="Цветок" Property="@(supply => $"{context.Flowers.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name}")" />
+    <PropertyColumn Title="Цветок" Property="@(supply => $"{dbContext.Flowers.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name}")" />
     <PropertyColumn Title="Дата поставки" Property="supply => supply.DeliveryDate.ToShortDateString()" />
     <PropertyColumn Title="Цена за единицу" Property="supply => supply.PricePerUnit" />
     <PropertyColumn Title="Количество" Property="supply => supply.Units" />
-    <PropertyColumn Title="Поставщик" Property="@(supply => $"{context.Suppliers.FirstOrDefault(f => f.SupplierId == supply.SupplierId)!.FullName}")" />
+    <PropertyColumn Title="Поставщик" Property="@(supply => $"{dbContext.Suppliers.FirstOrDefault(f => f.SupplierId == supply.SupplierId)!.FullName}")" />
 
     <TemplateColumn Context="supply">
         <a href="@($"supplies/edit?supplyid={supply.SupplyId}&supplierid={SupplierId}&flowerid={FlowerId}")">Редактировать</a> |
@@ -65,14 +70,29 @@
     private string SupplierNamePlaceholder = string.Empty;
     private string FlowerNamePlaceholder = string.Empty;
 
-    private AppDbContext context = default!;
+    private AppDbContext dbContext = default!;
+    private ClaimsPrincipal? userClaims;
 
     protected override async Task OnInitializedAsync()
     {
-        context = await DbFactory.CreateDbContextAsync();
-        SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
-        FlowerNamePlaceholder = FlowerId is null ? "" : $"({context.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
+        dbContext = await DbFactory.CreateDbContextAsync();
+        userClaims = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        await RedirectIfUserIsSupplierAgent();
+
+        SupplierNamePlaceholder = SupplierId is null ? "" : dbContext.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
+        FlowerNamePlaceholder = FlowerId is null ? "" : $"({dbContext.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private async Task RedirectIfUserIsSupplierAgent()
+    {
+        var userId = userClaims!.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        AppUser? user = await UserManager.FindByIdAsync(userId!);
+        if (userClaims.IsInRole("SupplierAgent"))
+        {
+            await DisposeAsync();
+            NavigationManager.NavigateTo($"supplies?supplierid={user!.SupplierId}");
+        }
+    }
+
+    public async ValueTask DisposeAsync() => await dbContext.DisposeAsync();
 }

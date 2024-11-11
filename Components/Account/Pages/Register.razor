@@ -5,6 +5,8 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using lab02.Database
+@using lab02.Models
 @using lab02.Models.Account
 
 @inject UserManager<AppUser> UserManager
@@ -14,6 +16,7 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject AppDbContext DbContext
 
 <PageTitle>Регистрация</PageTitle>
 
@@ -38,8 +41,39 @@
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Подтверждение пароля</label>
+                <label for="confirm-password">Подтвердите пароль</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="lastname" class="form-label">Фамилия:</label>
+                <InputText id="lastname" @bind-Value="Input.LastName" class="form-control" />
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="firstname" class="form-label">Имя:</label>
+                <InputText id="firstname" @bind-Value="Input.FirstName" class="form-control" />
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="middlename" class="form-label">Отчество:</label>
+                <InputText id="middlename" @bind-Value="Input.MiddleName" class="form-control" />
+                <ValidationMessage For="() => Input.MiddleName" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="position" class="form-label">Должность:</label>
+                <InputText id="position" @bind-Value="Input.Position" class="form-control" />
+                <ValidationMessage For="() => Input.Position" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="supplierid" class="form-label">Поставщик:</label>
+                <InputSelect id="supplierid" @bind-Value="Input.SupplierId" class="form-control">
+                    <option value="">Выберите поставщика (или попросите администратора добавить)</option>
+                    @foreach (var supplier in suppliers!)
+                    {
+                        <option value="@supplier.SupplierId">@supplier.FullName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Input.SupplierId" class="text-danger" />
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Зарегистрироваться</button>
         </EditForm>
@@ -55,11 +89,25 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+    private List<Supplier>? suppliers;
+
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+    protected override void OnInitialized()
+    {
+        suppliers = DbContext.Suppliers.OrderBy(s => s.FullName).ToList();
+    }
 
     public async Task RegisterUser(EditContext editContext)
     {
-        var user = CreateUser();
+        var user = new AppUser()
+            {
+                LastName = Input.LastName,
+                FirstName = Input.FirstName,
+                MiddleName = Input.MiddleName,
+                Position = Input.Position,
+                SupplierId = Input.SupplierId
+            };
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
@@ -71,6 +119,16 @@
             identityErrors = result.Errors;
             return;
         }
+
+        var supplierAgentRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == "SupplierAgent")!.Id;
+
+        DbContext.Add(new IdentityUserRole<string>()
+        {
+            UserId = user.Id,
+            RoleId = supplierAgentRoleId
+        });
+
+        await DbContext.SaveChangesAsync();
 
         Logger.LogInformation("User created a new account with password.");
 
@@ -131,7 +189,31 @@
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "Пароли не совпадают.")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Фамилия")]
+        [StringLength(100, ErrorMessage = "{0} должно быть не меньше {2} и не больше {1} символов.", MinimumLength = 3)]
+        public string? LastName { get; set; }
+
+        [Required]
+        [Display(Name = "Имя")]
+        [StringLength(100, ErrorMessage = "{0} должно быть не меньше {2} и не больше {1} символов.", MinimumLength = 3)]
+        public string? FirstName { get; set; }
+
+        [Required]
+        [Display(Name = "Отчество")]
+        [StringLength(100, ErrorMessage = "{0} должно быть не меньше {2} и не больше {1} символов.", MinimumLength = 3)]
+        public string? MiddleName { get; set; }
+
+        [Required]
+        [Display(Name = "Должность")]
+        [StringLength(100, ErrorMessage = "{0} должно быть не меньше {2} и не больше {1} символов.", MinimumLength = 3)]
+        public string? Position { get; set; }
+
+        [Required]
+        [Display(Name = "Поставщик")]
+        public int? SupplierId { get; set; }
     }
 }

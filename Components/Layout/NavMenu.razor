@@ -16,7 +16,7 @@
             </NavLink>
         </div>
 
-        <AuthorizeView>
+        <AuthorizeView Roles="Admin">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="flowers">
@@ -29,13 +29,6 @@
                         <span class="bi supplier-image" aria-hidden="true"></span> Поставщики
                     </NavLink>
                 </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="supplies">
-                        <span class="bi supply-image" aria-hidden="true"></span> Поставки
-                    </NavLink>
-                </div>
-
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="import">
                         <span class="bi excel-import-image" aria-hidden="true"></span> Импорт из Excel
@@ -45,6 +38,16 @@
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="export">
                         <span class="bi excel-export-image" aria-hidden="true"></span> Экспорт в Excel
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="supplies">
+                        <span class="bi supply-image" aria-hidden="true"></span> Поставки
                     </NavLink>
                 </div>
 

@@ -11,7 +11,6 @@ namespace lab02.Database
             var builder = new DbContextOptionsBuilder<AppDbContext>(options);
 
             using var context = new AppDbContext(builder.Options);
-            // result is true if the database had to be created
             if (await context.Database.EnsureCreatedAsync())
             {
                 await SeedAsync(context);
@@ -23,9 +22,9 @@ namespace lab02.Database
         private static async Task SeedAsync(AppDbContext context)
         {
             var adminRole = new IdentityRole("Admin");
-            var supplierRole = new IdentityRole("Supplier");
+            var supplierAgentRole = new IdentityRole("SupplierAgent");
             await context.Roles.AddAsync(adminRole);
-            await context.Roles.AddAsync(supplierRole);
+            await context.Roles.AddAsync(supplierAgentRole);
 
             var rootUser = new AppUser
             {

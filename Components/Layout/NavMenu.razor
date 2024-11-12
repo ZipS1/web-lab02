@@ -1,4 +1,11 @@
-﻿@inject NavigationManager NavigationManager
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using lab02.Database
+@using lab02.Models.Account
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<AppUser> UserManager
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -29,6 +36,13 @@
                         <span class="bi supplier-image" aria-hidden="true"></span> Поставщики
                     </NavLink>
                 </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="supplies">
+                        <span class="bi supply-image" aria-hidden="true"></span> Поставки
+                    </NavLink>
+                </div>
+
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="import">
                         <span class="bi excel-import-image" aria-hidden="true"></span> Импорт из Excel
@@ -43,14 +57,18 @@
             </Authorized>
         </AuthorizeView>
 
-        <AuthorizeView>
+        <AuthorizeView Roles="SupplierAgent">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="supplies">
+                    <NavLink class="nav-link" href=@($"supplies?supplierid={userSupplierId}")>
                         <span class="bi supply-image" aria-hidden="true"></span> Поставки
                     </NavLink>
                 </div>
+            </Authorized>
+        </AuthorizeView>
 
+        <AuthorizeView>
+            <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="">
                         <span class="bi profile-image" aria-hidden="true"></span> @context.User.Identity?.Name
@@ -85,10 +103,20 @@
 @code {
     private string? currentUrl;
 
-    protected override void OnInitialized()
+    private int? userSupplierId;
+
+    protected override async Task OnInitializedAsync()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        var userClaims = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        if (userClaims.IsInRole("Admin"))
+            return;
+
+        var userId = userClaims.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        AppUser? user = await UserManager.FindByIdAsync(userId!);
+        userSupplierId = user is null ? null : user.SupplierId;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)

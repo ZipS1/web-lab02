@@ -26,6 +26,7 @@
         <a href="@($"suppliers")">К списку поставщиков</a>
     </p>
 }
+
 <AuthorizeView Roles="Admin">
     @if (SupplierId is not null || FlowerId is not null)
     {
@@ -39,7 +40,7 @@
     <a href="@($"supplies/create?supplierid={SupplierId}&flowerid={FlowerId}")">Создать</a>
 </p>
 
-<QuickGrid Class="table" Items="dbContext.Supplies
+<QuickGrid Class="table" Items="dbContext!.Supplies
                                         .Where(s => SupplierId == null || s.SupplierId == SupplierId)
                                         .Where(s => FlowerId == null || s.FlowerId == FlowerId)">
     <PropertyColumn Title="Цветок" Property="@(supply => $"{dbContext.Flowers.FirstOrDefault(f => f.FlowerId == supply.FlowerId)!.Name}")" />
@@ -70,14 +71,9 @@
     protected override async Task OnInitializedAsync()
     {
         dbContext = await DbFactory.CreateDbContextAsync();
-        await RedirectIfUserIsSupplierAgent();
 
-        SupplierNamePlaceholder = SupplierId is null ? "" : dbContext.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
-        FlowerNamePlaceholder = FlowerId is null ? "" : $"({dbContext.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
-    }
-
-    private async Task RedirectIfUserIsSupplierAgent()
-    {
+        SupplierNamePlaceholder = SupplierId is null ? "" : dbContext!.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
+        FlowerNamePlaceholder = FlowerId is null ? "" : $"({dbContext!.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
     }
 
     public async ValueTask DisposeAsync() => await dbContext!.DisposeAsync();

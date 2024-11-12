@@ -25,7 +25,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
     //options
     //    .UseInMemoryDatabase(databaseName: "flowers_db")
     //    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -33,7 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     //options.UseInMemoryDatabase(databaseName: "flowers_db"), ServiceLifetime.Scoped
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped
 );
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();

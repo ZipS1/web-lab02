@@ -94,12 +94,14 @@ else if (SupplierId is not null)
     </div>
 }
 
-@if (SupplierId is not null || FlowerId is not null)
-{
-    <div>
-        <a href="@($"/supplies")">Назад к полному списку поставок</a>
-    </div>
-}
+<AuthorizeView Roles="Admin">
+    @if (SupplierId is not null || FlowerId is not null)
+    {
+        <div>
+            <a href="@($"/supplies")">Назад к полному списку поставок</a>
+        </div>
+    }
+</AuthorizeView>
 
 @code {
     [SupplyParameterFromForm]
@@ -117,7 +119,7 @@ else if (SupplierId is not null)
     private List<Flower>? flowers;
     private List<Supplier>? suppliers;
 
-    protected override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Supply.DeliveryDate = DateTime.Now;
         Supply.SupplierId = SupplierId ?? Supply.SupplierId;
@@ -128,8 +130,6 @@ else if (SupplierId is not null)
 
         SupplierNamePlaceholder = SupplierId is null ? "" : context.Suppliers.FirstOrDefault(s => s.SupplierId == SupplierId)!.FullName!;
         FlowerNamePlaceholder = FlowerId is null ? "" : $"({context.Flowers.FirstOrDefault(s => s.FlowerId == FlowerId)!.Name!})";
-
-        return Task.CompletedTask;
     }
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddSupply()
@@ -137,6 +137,6 @@ else if (SupplierId is not null)
         using var context = DbFactory.CreateDbContext();
         context.Supplies.Add(Supply);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/supplies");
+        NavigationManager.NavigateTo($"/supplies?supplierid={SupplierId}");
     }
 }

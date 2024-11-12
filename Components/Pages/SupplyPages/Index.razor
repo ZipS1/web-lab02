@@ -20,6 +20,7 @@
     </p>
 }
 
+<AuthorizeView Roles="Admin">
 @if (SupplierId is not null)
 {
     <p>
@@ -27,7 +28,7 @@
     </p>
 }
 
-<AuthorizeView Roles="Admin">
+
     @if (SupplierId is not null || FlowerId is not null)
     {
         <p>

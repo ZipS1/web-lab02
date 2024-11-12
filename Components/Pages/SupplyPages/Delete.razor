@@ -85,6 +85,6 @@
         using var context = DbFactory.CreateDbContext();
         context.Supplies.Remove(supply!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/supplies");
+        NavigationManager.NavigateTo($"/supplies?supplierid={SupplierId}");
     }
 }

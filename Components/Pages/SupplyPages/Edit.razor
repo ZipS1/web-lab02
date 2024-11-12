@@ -84,12 +84,14 @@ else if (FlowerId is not null)
     </div>
 }
 
-@if (SupplierId is not null || FlowerId is not null)
-{
-    <div>
-        <a href="@($"/supplies")">Назад к полному списку поставок</a>
-    </div>
-}
+<AuthorizeView Roles="Admin">
+    @if (SupplierId is not null || FlowerId is not null)
+    {
+        <div>
+            <a href="@($"/supplies")">Назад к полному списку поставок</a>
+        </div>
+    }
+</AuthorizeView>
 
 @code {
     [SupplyParameterFromQuery]
